@@ -49,6 +49,43 @@ class UserState(object):
     def get_mailbox(self, mbx_name):
         return self.mailboxes.get(mbx_name)
 
+    @asyncio.coroutine
+    def create_mailbox(self, mbx_name):
+        pass
+
+    @asyncio.coroutine
+    def delete_mailbox(self, mbx_name):
+        pass
+
+class MailboxPersistentState(object):
+
+    def __init__(self, mailbox):
+        self.mailbox = mailbox
+        self.mapping = {1: "1", 2: "2"}
+
+    @asyncio.coroutine
+    def uidnext(self):
+        return len(self.mapping) + 1
+
+    @asyncio.coroutine
+    def uidvalidity(self):
+        return 1
+
+    @asyncio.coroutine
+    def new(self, id):
+        pass
+
+    @asyncio.coroutine
+    def subscribed(self):
+        return True
+
+    @asyncio.coroutine
+    def __getitem__(self, index):
+        return self.mapping[index]
+
+    @asyncio.coroutine
+    def __delitem__(self, index):
+        del self.mapping[index]
 
 class MailboxState(object):
 
@@ -57,8 +94,8 @@ class MailboxState(object):
         self.authed = authed
         self.mailbox = mailbox
         self.subscribed = True
-        self.uid_validity = random.randint(0, 1000000)
-        self.next_uid = 101
+        self.writable = True
+        self.mapping = MailboxPersistentState()
 
         self.messages = [MessageState() for i in range(random.randint(0, 100))]
 
@@ -68,12 +105,50 @@ class MailboxState(object):
                 'recent_count': 0,
                 'unseen': next(filter(lambda msg: msg.unseen,
                                       self.messages), False),
-                'uid_validity': self.uid_validity,
-                'next_uid': self.next_uid}
+                'uid_validity': self.mapping.uidvalidity(),
+                'next_uid': self.mapping.uidnext(),
+                'writable': self.writable}
 
+    @asyncio.coroutine
+    def add_message(self, message, flags):
+        pass
+
+    @asyncio.coroutine
+    def delete_message(self, message):
+        pass
+
+    @asyncio.coroutine
+    def fetch_message(self, message):
+        pass
+
+    @asyncio.coroutine
+    def add_message_flag(self, message, flag):
+        pass
+
+    @asyncio.coroutine
+    def remove_message_flag(self, message, flag):
+        pass
 
 class MessageState(object):
 
-    def __init__(self):
+    def __init__(self, uid):
         super().__init__()
+        self.uid = uid
         self.unseen = (random.randint(0, 9) >= 8)
+
+
+    @asyncio.coroutine
+    def get_raw(self):
+        pass
+
+    @asyncio.coroutine
+    def get_flags(self):
+        pass
+
+    @asyncio.coroutine
+    def get_cachable_fields(self):
+        pass
+
+    @asyncio.coroutine
+    def get_cached_fields(self):
+        pass
